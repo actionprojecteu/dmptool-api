@@ -35,7 +35,7 @@ def hello_world():
 @app.route('/start')
 def start():
     if current_user.is_authenticated:
-        return redirect(url_for("test"))
+        return redirect(url_for("hello_world"))
     else:
         return jsonify(
                 message="It is neccesary to be logged."
