@@ -5,7 +5,6 @@ EXPOSE 5000
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 EXPOSE 5000
-CMD ["python","manage.py","create_tables"]
 CMD ["python","manage.py","runserver","-h","0.0.0.0"]
 
 # docker build -t dmptool .
