@@ -12,8 +12,8 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 PERMANENT_SESSION_LIFETIME = datetime.timedelta(hours=24)
 
-
-MONGO_URI = 'mongodb://localhost:27017/dmptool'
+MONGO_URI = 'mongodb://mongodb:27017/dmptool'
+# MONGO_URI = 'mongodb://localhost:27017/dmptool'
 
 CORS_HEADERS = 'Content-Type'
 
