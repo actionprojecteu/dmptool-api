@@ -9,7 +9,7 @@ import os
 
 import json
 from bson import ObjectId
-from flask_pymongo import PyMongo
+from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -111,7 +111,11 @@ def get_all_dmps():
 @app.route('/dmps', methods=['POST'])
 @login_required
 def post_dmp():
-    data = request.get_json()
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.dmps.insert_one(data)
     return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 201 
 
@@ -119,10 +123,25 @@ def post_dmp():
 @app.route('/dmps/<dmp_id>', methods=['PUT'])
 @login_required
 def put_dmp(dmp_id):
-    data = request.get_json()
-    mongo.db.dmps.update_one({"name": dmp_id}, {"$set": data})
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
+    mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
 
+@app.route('/dmps/<dmp_id>')
+@login_required
+def get_dmp(dmp_id):
+    try:
+        dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
+    except Exception as e:
+            print(e)
+            return jsonify(error="Not a correct dmp id format."), 400
+    if dmp is None:
+        return jsonify({'error': 'DMP ' + dmp_id + 'not found'}), 404
+    return JSONEncoder().encode(dmp)
 
 ########## tasks part ##########
 
@@ -147,7 +166,11 @@ def get_all_tasks():
 @app.route('/task', methods=['POST'])
 @login_required
 def post_task():
-    data = request.get_json()
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.tasks.insert_one(data)
     return jsonify({'ok': True, 'message': 'Task created successfully!'}), 201
 
