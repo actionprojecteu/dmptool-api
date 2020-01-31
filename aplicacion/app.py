@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required,\
     current_user
 import os
-
 import json
 from bson import ObjectId
 from flask_pymongo import PyMongo, ObjectId
