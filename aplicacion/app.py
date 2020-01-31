@@ -37,52 +37,57 @@ def start():
     if current_user.is_authenticated:
         return redirect(url_for("hello_world"))
     else:
-        return jsonify(
-                message="It is neccesary to be logged."
-                )
+        return jsonify(message="It is neccesary to be logged.")
 
 ########## login part ##########
 
 @app.route('/login')
 def login():
     if current_user.is_authenticated:
-        return jsonify(
-            message="User already logged: " + current_user.username
-            )
+        return jsonify(message="User already logged: " + current_user.username)
+
+    try:
+        username=request.authorization["username"]
+        password=request.authorization["password"]
+    except Exception as e:
+            print(e)
+            return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
     from aplicacion.models import Usuarios
-    user = Usuarios.query.filter_by(username=request.authorization["username"]).first()
-    if user is not None and user.verify_password(request.authorization["password"]):
+    user = Usuarios.query.filter_by(username=username).first()
+    if user is not None and user.verify_password(password):
         session.permanent = True
         login_user(user)
         return jsonify(
-            username=request.authorization["username"],
-            email=user.email
-            )
+                username=username,
+                email=user.email
+                )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 @app.route("/logout")
 def logout():
     logout_user()
-    return jsonify(
-                message="User has logout."
-                )
+    return jsonify(message="User has logout.")
 
-@app.route('/changepassword/')
+@app.route('/changepassword', methods=['GET','PUT'])
 @login_required
 def changepassword():
     if not current_user.is_authenticated:
             return jsonify(error="Unauthenticated. Error in log in."), 401
 
+    try:
+        newpassword=request.headers['newpassword']
+    except Exception as e:
+            print(e)
+            return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 400
+
     from aplicacion.models import Usuarios
     user = Usuarios.query.filter_by(username=current_user.username).first()
     if user is not None:
-        user.password = request.headers['newpassword']
+        user.password = newpassword
         db.session.commit()
-        return jsonify(
-            message="Password change successfully"
-            )
+        return jsonify(message="Password change successfully.")
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
@@ -108,7 +113,7 @@ def get_all_dmps():
 def post_dmp():
     data = request.get_json()
     mongo.db.dmps.insert_one(data)
-    return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 200
+    return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 201 
 
 
 @app.route('/dmps/<dmp_id>', methods=['PUT'])
@@ -144,7 +149,7 @@ def get_all_tasks():
 def post_task():
     data = request.get_json()
     mongo.db.tasks.insert_one(data)
-    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 200
+    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 201
 
 
 ########## Login manager part ##########
