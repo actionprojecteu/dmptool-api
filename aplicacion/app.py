@@ -60,7 +60,8 @@ def login():
         login_user(user)
         return jsonify(
                 username=username,
-                email=user.email
+                email=user.email,
+                projects=user.projects
                 )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401

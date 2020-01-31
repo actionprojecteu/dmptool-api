@@ -1,9 +1,17 @@
-from sqlalchemy import Boolean, Column
-from sqlalchemy import DateTime, Integer, String, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, ForeignKey
+from sqlalchemy import DateTime, Integer, String, Text, Float
+from sqlalchemy.orm import relationship, backref
 from aplicacion.app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+class Projects(db.Model):
+    __tablename__ = 'projects'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(128), nullable=False)
+    description = Column(Text, nullable=True)
+
+    def __repr__(self):
+        return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
 
 class Usuarios(db.Model):
     __tablename__ = 'users'
@@ -12,6 +20,8 @@ class Usuarios(db.Model):
     password_hash = Column(String(128), nullable=False)
     email = Column(String(200), nullable=True, default="none")
     admin = Column(Boolean, default=False)
+
+    projects = relationship("Projects", secondary="user_project", backref='users')
 
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
@@ -42,3 +52,13 @@ class Usuarios(db.Model):
 
     def is_admin(self):
         return self.admin
+
+
+class UserProject(db.Model):
+    __tablename__ = 'user_project'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+
+    user = relationship(Usuarios, backref=backref("user_project", cascade="all, delete-orphan"))
+    projects = relationship(Projects, backref=backref("user_project", cascade="all, delete-orphan"))

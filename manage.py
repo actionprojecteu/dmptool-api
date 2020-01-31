@@ -23,24 +23,47 @@ def drop_tables():
 @manager.command
 def create_admin():
     "Create an admin user."
-    usuario = {"username": input("Username:"),
+    user = {"username": input("Username:"),
                "password": getpass("Password:"),
                "email": input("Email:"),
                "admin": True}
-    usu = Usuarios(**usuario)
+    usu = Usuarios(**user)
     db.session.add(usu)
     db.session.commit()
 
 @manager.command
 def create_user():
     "Create a normal user."
-    usuario = {"username": input("Username:"),
+    user = {"username": input("Username:"),
                "password": getpass("Password:"),
                "email": input("Email:"),
                "admin": False}
-    usu = Usuarios(**usuario)
+    usu = Usuarios(**user)
     db.session.add(usu)
     db.session.commit()
+
+@manager.command
+def create_project():
+    "Create a project."
+    project = {"name": input("Name:"),
+               "description": input("Description:")}
+    pro = Projects(**project)
+    db.session.add(pro)
+    db.session.commit()
+
+@manager.command
+def create_relation():
+    "Relation an user with a project."
+    user = Usuarios.query.filter_by(username=input("Username:")).first()
+    project = Projects.query.filter_by(name=input("Project Name:")).first()
+    user.projects.append(project)
+
+@manager.command
+def delete_relation():
+    "Delete relation of an user with a project."
+    user = Usuarios.query.filter_by(username=input("Username:")).first()
+    project = Projects.query.filter_by(name=input("Project Name:")).first()
+    user.projects.delete(project)
 
 if __name__ == '__main__':
     manager.run()
