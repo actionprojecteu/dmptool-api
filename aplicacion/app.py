@@ -6,10 +6,9 @@ from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required,\
     current_user
 import os
-
 import json
 from bson import ObjectId
-from flask_pymongo import PyMongo
+from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -37,55 +36,63 @@ def start():
     if current_user.is_authenticated:
         return redirect(url_for("hello_world"))
     else:
-        return jsonify(
-                message="It is neccesary to be logged."
-                )
+        return jsonify(message="It is neccesary to be logged.")
+
+
+########## login part ##########
 
 @app.route('/login')
 def login():
     if current_user.is_authenticated:
-        return jsonify(
-            message="User already logged: " + current_user.username
-            )
+        return jsonify(message="User already logged: " + current_user.username)
+
+    try:
+        username=request.authorization["username"]
+        password=request.authorization["password"]
+    except Exception as e:
+            print(e)
+            return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
     from aplicacion.models import Usuarios
-    user = Usuarios.query.filter_by(username=request.authorization["username"]).first()
-    if user is not None and user.verify_password(request.authorization["password"]):
+    user = Usuarios.query.filter_by(username=username).first()
+    if user is not None and user.verify_password(password):
         session.permanent = True
         login_user(user)
         return jsonify(
-            username=request.authorization["username"],
-            email=user.email
-            )
+                username=username,
+                email=user.email
+                )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 @app.route("/logout")
 def logout():
     logout_user()
-    return jsonify(
-                message="User has logout."
-                )
+    return jsonify(message="User has logout.")
 
-@app.route('/changepassword/')
+@app.route('/changepassword', methods=['GET','PUT'])
 @login_required
 def changepassword():
     if not current_user.is_authenticated:
             return jsonify(error="Unauthenticated. Error in log in."), 401
 
+    try:
+        newpassword=request.headers['newpassword']
+    except Exception as e:
+            print(e)
+            return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 400
+
     from aplicacion.models import Usuarios
     user = Usuarios.query.filter_by(username=current_user.username).first()
     if user is not None:
-        user.password = request.headers['newpassword']
+        user.password = newpassword
         db.session.commit()
-        return jsonify(
-            message="Password change successfully"
-            )
+        return jsonify(message="Password change successfully.")
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 
-########## Esteban part ##########
+########## dmps part ##########
 
 @app.route('/dmps', methods=['GET'])
 @login_required
@@ -104,21 +111,69 @@ def get_all_dmps():
 @app.route('/dmps', methods=['POST'])
 @login_required
 def post_dmp():
-    data = request.get_json()
-
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.dmps.insert_one(data)
-
-    return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 200
+    return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 201 
 
 
 @app.route('/dmps/<dmp_id>', methods=['PUT'])
 @login_required
 def put_dmp(dmp_id):
-    data = request.get_json()
-
-    mongo.db.dmps.update_one({"name": dmp_id}, {"$set": data})
-
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
+    mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
+
+@app.route('/dmps/<dmp_id>')
+@login_required
+def get_dmp(dmp_id):
+    try:
+        dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
+    except Exception as e:
+            print(e)
+            return jsonify(error="Not a correct dmp id format."), 400
+    if dmp is None:
+        return jsonify({'error': 'DMP ' + dmp_id + 'not found'}), 404
+    return JSONEncoder().encode(dmp)
+
+
+########## tasks part ##########
+
+## Format task = {status, url, dmp}
+## Stauts: pending, finished, error
+## Example: {"status":"pending", "url":"nothingYet", "dmp":"1234"}
+
+@app.route('/tasks', methods=['GET'])
+@login_required
+def get_all_tasks():
+    status = request.args.get('status')
+    if status is not None:
+        tasks = mongo.db.tasks.find({'status':status})
+    else:
+        tasks = mongo.db.tasks.find()
+    output = []
+    for task in tasks:
+        output.append(task)
+    print (output)
+    return JSONEncoder().encode(output)
+
+@app.route('/task', methods=['POST'])
+@login_required
+def post_task():
+    try:
+        data = request.get_json(force=True)
+    except Exception as e:
+            print(e)
+            return jsonify(error="Failed to decode JSON object."), 400
+    mongo.db.tasks.insert_one(data)
+    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 201
 
 
 ########## Login manager part ##########
