@@ -41,6 +41,8 @@ def start():
                 message="It is neccesary to be logged."
                 )
 
+########## login part ##########
+
 @app.route('/login')
 def login():
     if current_user.is_authenticated:
@@ -85,7 +87,7 @@ def changepassword():
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 
-########## Esteban part ##########
+########## dmps part ##########
 
 @app.route('/dmps', methods=['GET'])
 @login_required
@@ -105,9 +107,7 @@ def get_all_dmps():
 @login_required
 def post_dmp():
     data = request.get_json()
-
     mongo.db.dmps.insert_one(data)
-
     return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 200
 
 
@@ -115,10 +115,36 @@ def post_dmp():
 @login_required
 def put_dmp(dmp_id):
     data = request.get_json()
-
     mongo.db.dmps.update_one({"name": dmp_id}, {"$set": data})
-
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
+
+
+########## tasks part ##########
+
+## Format task = {status, url, dmp}
+## Stauts: pending, finished, error
+## Example: {"status":"pending", "url":"nothingYet", "dmp":"1234"}
+
+@app.route('/tasks', methods=['GET'])
+@login_required
+def get_all_tasks():
+    status = request.args.get('status')
+    if status is not None:
+        tasks = mongo.db.tasks.find({'status':status})
+    else:
+        tasks = mongo.db.tasks.find()
+    output = []
+    for task in tasks:
+        output.append(task)
+    print (output)
+    return JSONEncoder().encode(output)
+
+@app.route('/task', methods=['POST'])
+@login_required
+def post_task():
+    data = request.get_json()
+    mongo.db.tasks.insert_one(data)
+    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 200
 
 
 ########## Login manager part ##########
