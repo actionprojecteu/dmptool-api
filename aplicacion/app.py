@@ -39,6 +39,7 @@ def start():
     else:
         return jsonify(message="It is neccesary to be logged.")
 
+
 ########## login part ##########
 
 @app.route('/login')
@@ -142,6 +143,7 @@ def get_dmp(dmp_id):
     if dmp is None:
         return jsonify({'error': 'DMP ' + dmp_id + 'not found'}), 404
     return JSONEncoder().encode(dmp)
+
 
 ########## tasks part ##########
 
