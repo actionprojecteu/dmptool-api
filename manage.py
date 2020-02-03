@@ -16,7 +16,7 @@ def create_tables():
 
 @manager.command
 def drop_tables():
-    "Drop all project relational database tables. THIS DELETES DATA."
+    "Drop all project relational database tables. THIS DELETES ALL DATA."
     db.drop_all()
 
 
@@ -27,7 +27,7 @@ def create_admin():
                "password": getpass("Password:"),
                "email": input("Email:"),
                "admin": True}
-    usu = Usuarios(**user)
+    usu = Users(**user)
     db.session.add(usu)
     db.session.commit()
 
@@ -38,7 +38,7 @@ def create_user():
                "password": getpass("Password:"),
                "email": input("Email:"),
                "admin": False}
-    usu = Usuarios(**user)
+    usu = Users(**user)
     db.session.add(usu)
     db.session.commit()
 
@@ -54,16 +54,18 @@ def create_project():
 @manager.command
 def create_relation():
     "Relation an user with a project."
-    user = Usuarios.query.filter_by(username=input("Username:")).first()
+    user = Users.query.filter_by(username=input("Username:")).first()
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.append(project)
+    db.session.commit()
 
 @manager.command
 def delete_relation():
     "Delete relation of an user with a project."
-    user = Usuarios.query.filter_by(username=input("Username:")).first()
+    user = Users.query.filter_by(username=input("Username:")).first()
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.delete(project)
+    db.session.commit()
 
 if __name__ == '__main__':
     manager.run()

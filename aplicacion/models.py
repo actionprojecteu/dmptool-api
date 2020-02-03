@@ -10,10 +10,12 @@ class Projects(db.Model):
     name = Column(String(128), nullable=False)
     description = Column(Text, nullable=True)
 
+    # users = relationship("Users", secondary="user_project", backref='projects')
+
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
 
-class Usuarios(db.Model):
+class Users(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(100), nullable=False)
@@ -54,11 +56,7 @@ class Usuarios(db.Model):
         return self.admin
 
 
-class UserProject(db.Model):
-    __tablename__ = 'user_project'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
-
-    user = relationship(Usuarios, backref=backref("user_project", cascade="all, delete-orphan"))
-    projects = relationship(Projects, backref=backref("user_project", cascade="all, delete-orphan"))
+user_project = db.Table('user_project',
+    db.Column('project_id', db.Integer, db.ForeignKey('projects.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+)
