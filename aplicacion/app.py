@@ -53,14 +53,23 @@ def login():
             print(e)
             return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
-    from aplicacion.models import Usuarios
-    user = Usuarios.query.filter_by(username=username).first()
+    from aplicacion.models import Users, Projects
+    user = Users.query.filter_by(username=username).first()
     if user is not None and user.verify_password(password):
         session.permanent = True
         login_user(user)
+
+        userproject = Projects.query.filter(Projects.users.any(id=user.id)).all()
+        nameprojects=""
+        for i,project in enumerate(userproject):
+            nameprojects+=project.name
+            if i < len(userproject) - 1:
+                nameprojects+=","
+
         return jsonify(
                 username=username,
-                email=user.email
+                email=user.email,
+                project=nameprojects
                 )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
@@ -82,8 +91,8 @@ def changepassword():
             print(e)
             return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 400
 
-    from aplicacion.models import Usuarios
-    user = Usuarios.query.filter_by(username=current_user.username).first()
+    from aplicacion.models import Users
+    user = Users.query.filter_by(username=current_user.username).first()
     if user is not None:
         user.password = newpassword
         db.session.commit()
@@ -180,8 +189,8 @@ def post_task():
 
 @login_manager.user_loader
 def load_user(user_id):
-    from aplicacion.models import Usuarios
-    return Usuarios.query.get(int(user_id))
+    from aplicacion.models import Users
+    return Users.query.get(int(user_id))
 
 @login_manager.unauthorized_handler
 def unauthorized():
