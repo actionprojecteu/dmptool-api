@@ -16,5 +16,3 @@ MONGO_URI = 'mongodb://mongodb:27017/dmptool'
 # MONGO_URI = 'mongodb://localhost:27017/dmptool'
 
 CORS_HEADERS = 'Content-Type'
-
-
