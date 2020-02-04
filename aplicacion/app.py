@@ -1,3 +1,4 @@
+## Imports
 from flask import Flask, render_template, redirect, url_for, request, abort,\
     session, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +12,7 @@ from bson import ObjectId
 from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS, cross_origin
 
+## Initialize
 app = Flask(__name__)
 app.config.from_object(config)
 
@@ -36,7 +38,7 @@ def start():
     if current_user.is_authenticated:
         return redirect(url_for("hello_world"))
     else:
-        return jsonify(message="It is neccesary to be logged.")
+        return jsonify(message="It is neccesary to be logged."), 401
 
 
 ########## login part ##########

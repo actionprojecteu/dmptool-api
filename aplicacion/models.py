@@ -7,18 +7,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class Projects(db.Model):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True)
-    name = Column(String(128), nullable=False)
+    name = Column(String(128), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-
-    # users = relationship("Users", secondary="user_project", backref='projects')
 
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
 
+
 class Users(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    username = Column(String(100), nullable=False)
+    username = Column(String(100), nullable=False, unique=True)
     password_hash = Column(String(128), nullable=False)
     email = Column(String(200), nullable=True, default="none")
     admin = Column(Boolean, default=False)
