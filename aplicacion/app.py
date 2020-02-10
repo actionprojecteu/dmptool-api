@@ -45,7 +45,7 @@ def start():
 
 ################# login part #################
 
-@app.route('/login')
+@app.route('/login', methods=['GET'])
 def login():
     if get_jwt_identity() is not None:
         return jsonify(message="User already logged: " + current_user.username)
@@ -98,7 +98,7 @@ def login():
 def logout():
     jti = get_raw_jwt()['jti']
     blacklist.add(jti)
-    return jsonify({"msg": "Successfully logged out"}), 200
+    return jsonify({"msg": "Successfully logged out"}), 204
 
 
 @app.route('/changepassword', methods=['PUT'])
@@ -115,7 +115,7 @@ def changepassword():
     if user is not None:
         user.password = newpassword
         db.session.commit()
-        return jsonify(message="Password change successfully."), 201
+        return jsonify(message="Password change successfully."), 200
     else:
         return jsonify(error="Unauthenticated. Error in the token."), 401
 
@@ -143,7 +143,20 @@ def post_dmp():
             print(e)
             return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.dmps.insert_one(data)
-    return jsonify({'ok': True, 'message': 'DMP created successfully!'}), 201 
+    return jsonify({'ok': True, 'message': 'DMP created successfully.'}), 201 
+
+
+@app.route('/dmps/<dmp_id>', methods=['GET'])
+@jwt_required
+def get_dmp(dmp_id):
+    try:
+        dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
+    except Exception as e:
+            print(e)
+            return jsonify(error="Not a correct dmp id format."), 400
+    if dmp is None:
+        return jsonify({'error': 'DMP ' + dmp_id + 'not found.'}), 404
+    return JSONEncoder().encode(dmp)
 
 
 @app.route('/dmps/<dmp_id>', methods=['PUT'])
@@ -159,20 +172,7 @@ def put_dmp(dmp_id):
     except Exception as e:
         print(e)
         return jsonify(error="Not a correct dmp id format."), 400
-    return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
-
-
-@app.route('/dmps/<dmp_id>', methods=['GET'])
-@jwt_required
-def get_dmp(dmp_id):
-    try:
-        dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
-    except Exception as e:
-            print(e)
-            return jsonify(error="Not a correct dmp id format."), 400
-    if dmp is None:
-        return jsonify({'error': 'DMP ' + dmp_id + 'not found'}), 404
-    return JSONEncoder().encode(dmp)
+    return jsonify({'ok': True, 'message': 'DMP updated successfully.'})
 
 
 ################# tasks part #################
