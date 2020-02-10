@@ -76,7 +76,7 @@ def login():
                 username=username,
                 email=user.email,
                 project=userproject.name,
-                projectdescription=userproject.description,
+                project_description=userproject.description,
                 access_token= accesstoken,
                 refresh_token= refreshtoken
                 )
@@ -85,7 +85,7 @@ def login():
                 username=username,
                 email=user.email,
                 project="none",
-                projectdescription="",
+                project_description="",
                 access_token= accesstoken,
                 refresh_token= refreshtoken
                 )
