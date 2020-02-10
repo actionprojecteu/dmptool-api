@@ -1,6 +1,5 @@
 ########## Imports ##########
-from flask import Flask, render_template, redirect, url_for, request, abort,\
-    session, jsonify
+from flask import Flask, redirect, url_for, request, abort, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
@@ -23,6 +22,8 @@ cors = CORS(app)
 mongo = PyMongo(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+
+blacklist = set()
 
 # logging.basicConfig(filename='log/error.log',
 #     level=logging.INFO,
@@ -92,16 +93,12 @@ def login():
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 
-@app.route("/logout")
+@app.route('/logout', methods=['DELETE'])
 @jwt_required
 def logout():
     jti = get_raw_jwt()['jti']
-    try:
-        revoked_token = RevokedTokenModel(jti = jti)
-        revoked_token.add()
-        return {'message': 'Access token has been revoked'}
-    except:
-        return {'message': 'Something went wrong'}, 500
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
 
 
 @app.route('/changepassword', methods=['GET','PUT'])
@@ -211,6 +208,11 @@ def post_task():
 @jwt_refresh_token_required
 def refresh():
     return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 201
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return jti in blacklist
 
 
 ########## Error handler part ##########
