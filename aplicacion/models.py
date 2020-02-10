@@ -3,8 +3,6 @@ from sqlalchemy import Boolean, Column, ForeignKey, DateTime, Integer,\
 from sqlalchemy.orm import relationship, backref
 from aplicacion.app import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
 
 
 class Projects(db.Model):
