@@ -21,7 +21,7 @@ class Users(db.Model):
     username = Column(String(100), nullable=False, unique=True)
     password_hash = Column(String(128), nullable=False)
     email = Column(String(200), nullable=True, default="none")
-    admin = Column(Boolean,nullable=False, default=False)
+    admin = Column(Boolean, nullable=False, default=False)
 
     projects = relationship("Projects", secondary="user_project", backref='users')
 
