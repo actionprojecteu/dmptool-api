@@ -101,7 +101,7 @@ def logout():
     return jsonify({"msg": "Successfully logged out"}), 200
 
 
-@app.route('/changepassword', methods=['GET','PUT'])
+@app.route('/changepassword', methods=['PUT'])
 @jwt_required
 def changepassword():
     try:
@@ -115,7 +115,7 @@ def changepassword():
     if user is not None:
         user.password = newpassword
         db.session.commit()
-        return jsonify(message="Password change successfully.")
+        return jsonify(message="Password change successfully."), 201
     else:
         return jsonify(error="Unauthenticated. Error in the token."), 401
 
@@ -162,7 +162,7 @@ def put_dmp(dmp_id):
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
 
 
-@app.route('/dmps/<dmp_id>')
+@app.route('/dmps/<dmp_id>', methods=['GET'])
 @jwt_required
 def get_dmp(dmp_id):
     try:
