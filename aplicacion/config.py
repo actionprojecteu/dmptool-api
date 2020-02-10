@@ -9,12 +9,12 @@ CORS_HEADERS = 'Content-Type'
 
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/dbase.db'.format(PWD)
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@{}/dmpsqlite'.format(os.environ["MYSQL_PASSWORD"],os.environ["MYSQL_PORT_3306_TCP_ADDR"])
-#SQLALCHEMY_TRACK_MODIFICATIONS = False
+#SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@{}/dmpsqlite'.format(os.environ["MYSQL_PASSWORD"],os.environ["MYSQL_PORT_3306_TCP_ADDR"])
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-MONGO_URI = 'mongodb://mongodb:27017/dmptool'
-#MONGO_URI = 'mongodb://localhost:27017/dmptool'
+#MONGO_URI = 'mongodb://mongodb:27017/dmptool'
+MONGO_URI = 'mongodb://localhost:27017/dmptool'
 
 
 JWT_SECRET_KEY = 'jwt-secret for the tokens'
