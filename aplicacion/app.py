@@ -68,7 +68,8 @@ def login():
         accesstoken = create_access_token(identity = username)
         refreshtoken = create_refresh_token(identity = username)
 
-        response = jsonify(
+        if userproject is not None:
+            return jsonify(
                 username=username,
                 email=user.email,
                 project=userproject.name,
@@ -76,7 +77,15 @@ def login():
                 access_token= accesstoken,
                 refresh_token= refreshtoken
                 )
-        return response
+        else:
+            return jsonify(
+                username=username,
+                email=user.email,
+                project="none",
+                projectdescription="",
+                access_token= accesstoken,
+                refresh_token= refreshtoken
+                )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
@@ -200,7 +209,7 @@ def post_task():
 @app.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
-    return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 200
+    return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 201
 
 
 ########## Error handler part ##########
@@ -221,9 +230,3 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
-
-# class TokenRefresh(Resource):
-#     @jwt_refresh_token_required
-#     def post(self):
-#         access_token = create_access_token(identity = get_jwt_identity())
-#         return {'access_token': access_token}
