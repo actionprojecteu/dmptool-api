@@ -1,4 +1,4 @@
-## Imports
+########## Imports ##########
 from flask import Flask, render_template, redirect, url_for, request, abort,\
     session, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -6,14 +6,16 @@ from aplicacion import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from flask_pymongo import PyMongo, ObjectId
-from flask_cors import CORS, cross_origin
-from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
+    jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt
 import os
 import json
 import logging
-import requests
 
-## Initialize
+
+########## Initialize ##########
+
 app = Flask(__name__)
 app.config.from_object(config)
 
@@ -89,6 +91,7 @@ def login():
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
+
 @app.route("/logout")
 @jwt_required
 def logout():
@@ -99,10 +102,7 @@ def logout():
         return {'message': 'Access token has been revoked'}
     except:
         return {'message': 'Something went wrong'}, 500
-# @app.route("/logout")
-# def logout():
-#     logout_user()
-#     return jsonify(message="User has logout.")
+
 
 @app.route('/changepassword', methods=['GET','PUT'])
 @jwt_required
@@ -124,6 +124,7 @@ def changepassword():
 
 
 ########## dmps part ##########
+# DMP format: { "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
 @app.route('/dmps', methods=['GET'])
 @jwt_required
@@ -134,7 +135,6 @@ def get_all_dmps():
         output.append(dmp)
     return JSONEncoder().encode(output)
 
-#{ "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
 @app.route('/dmps', methods=['POST'])
 @jwt_required
@@ -159,6 +159,7 @@ def put_dmp(dmp_id):
     mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
 
+
 @app.route('/dmps/<dmp_id>')
 @jwt_required
 def get_dmp(dmp_id):
@@ -172,7 +173,7 @@ def get_dmp(dmp_id):
     return JSONEncoder().encode(dmp)
 
 
-########## tasks part ##########
+########## asks part ##########
 
 ## Format task = {status, url, dmp}
 ## Stauts: pending, finished, error
@@ -201,7 +202,7 @@ def post_task():
             print(e)
             return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.tasks.insert_one(data)
-    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 201
+    return jsonify({'ok': True, 'message': 'Task created successfully.'}), 201
 
 
 ########## Tokens JWT part ##########
@@ -220,7 +221,7 @@ def page_not_found(error):
 
 @app.errorhandler(401)
 def unauthorized(error):
-    return jsonify({'error':"Unauthorized"}), 401
+    return jsonify({'error':"Unauthorized."}), 401
 
 
 ########## Resources (class) ##########
