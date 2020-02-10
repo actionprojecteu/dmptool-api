@@ -1,19 +1,20 @@
-## Imports
-from flask import Flask, render_template, redirect, url_for, request, abort,\
-    session, jsonify
+########## Imports ##########
+from flask import Flask, redirect, url_for, request, abort, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from flask_pymongo import PyMongo, ObjectId
-from flask_cors import CORS, cross_origin
-from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
+    jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt
 import os
 import json
 import logging
-import requests
 
-## Initialize
+
+########## Initialize ##########
+
 app = Flask(__name__)
 app.config.from_object(config)
 
@@ -21,6 +22,8 @@ cors = CORS(app)
 mongo = PyMongo(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+
+blacklist = set()
 
 # logging.basicConfig(filename='log/error.log',
 #     level=logging.INFO,
@@ -68,7 +71,8 @@ def login():
         accesstoken = create_access_token(identity = username)
         refreshtoken = create_refresh_token(identity = username)
 
-        response = jsonify(
+        if userproject is not None:
+            return jsonify(
                 username=username,
                 email=user.email,
                 project=userproject.name,
@@ -76,24 +80,26 @@ def login():
                 access_token= accesstoken,
                 refresh_token= refreshtoken
                 )
-        return response
+        else:
+            return jsonify(
+                username=username,
+                email=user.email,
+                project="none",
+                projectdescription="",
+                access_token= accesstoken,
+                refresh_token= refreshtoken
+                )
     else:
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
-@app.route("/logout")
+
+@app.route('/logout', methods=['DELETE'])
 @jwt_required
 def logout():
     jti = get_raw_jwt()['jti']
-    try:
-        revoked_token = RevokedTokenModel(jti = jti)
-        revoked_token.add()
-        return {'message': 'Access token has been revoked'}
-    except:
-        return {'message': 'Something went wrong'}, 500
-# @app.route("/logout")
-# def logout():
-#     logout_user()
-#     return jsonify(message="User has logout.")
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
+
 
 @app.route('/changepassword', methods=['GET','PUT'])
 @jwt_required
@@ -115,6 +121,7 @@ def changepassword():
 
 
 ########## dmps part ##########
+# DMP format: { "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
 @app.route('/dmps', methods=['GET'])
 @jwt_required
@@ -125,7 +132,6 @@ def get_all_dmps():
         output.append(dmp)
     return JSONEncoder().encode(output)
 
-#{ "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
 @app.route('/dmps', methods=['POST'])
 @jwt_required
@@ -150,6 +156,7 @@ def put_dmp(dmp_id):
     mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
 
+
 @app.route('/dmps/<dmp_id>')
 @jwt_required
 def get_dmp(dmp_id):
@@ -163,7 +170,7 @@ def get_dmp(dmp_id):
     return JSONEncoder().encode(dmp)
 
 
-########## tasks part ##########
+########## asks part ##########
 
 ## Format task = {status, url, dmp}
 ## Stauts: pending, finished, error
@@ -192,7 +199,7 @@ def post_task():
             print(e)
             return jsonify(error="Failed to decode JSON object."), 400
     mongo.db.tasks.insert_one(data)
-    return jsonify({'ok': True, 'message': 'Task created successfully!'}), 201
+    return jsonify({'ok': True, 'message': 'Task created successfully.'}), 201
 
 
 ########## Tokens JWT part ##########
@@ -200,7 +207,12 @@ def post_task():
 @app.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
-    return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 200
+    return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 201
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return jti in blacklist
 
 
 ########## Error handler part ##########
@@ -211,7 +223,7 @@ def page_not_found(error):
 
 @app.errorhandler(401)
 def unauthorized(error):
-    return jsonify({'error':"Unauthorized"}), 401
+    return jsonify({'error':"Unauthorized."}), 401
 
 
 ########## Resources (class) ##########
@@ -221,9 +233,3 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
-
-# class TokenRefresh(Resource):
-#     @jwt_refresh_token_required
-#     def post(self):
-#         access_token = create_access_token(identity = get_jwt_identity())
-#         return {'access_token': access_token}
