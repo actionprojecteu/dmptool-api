@@ -154,7 +154,11 @@ def put_dmp(dmp_id):
     except Exception as e:
             print(e)
             return jsonify(error="Failed to decode JSON object."), 400
-    mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
+    try:
+        mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
+    except Exception as e:
+        print(e)
+        return jsonify(error="Not a correct dmp id format."), 400
     return jsonify({'ok': True, 'message': 'DMP updated successfully!'}), 200
 
 
@@ -188,7 +192,6 @@ def get_all_tasks():
     output = []
     for task in tasks:
         output.append(task)
-    print (output)
     return JSONEncoder().encode(output)
 
 @app.route('/task', methods=['POST'])
@@ -199,6 +202,7 @@ def post_task():
     except Exception as e:
             print(e)
             return jsonify(error="Failed to decode JSON object."), 400
+    data.update({'status':'pending'})
     mongo.db.tasks.insert_one(data)
     return jsonify({'ok': True, 'message': 'Task created successfully.'}), 201
 

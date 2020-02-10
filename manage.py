@@ -48,6 +48,7 @@ def delete_user():
     username= input("Username:")
     user = Users.query.filter_by(username=username).first()
     db.session.delete(user)
+    db.session.commit()
 
 @manager.command
 def create_project():
@@ -56,6 +57,14 @@ def create_project():
                "description": input("Description:")}
     pro = Projects(**project)
     db.session.add(pro)
+    db.session.commit()
+
+@manager.command
+def delete_project():
+    "Delate a project."
+    projectname= input("Username:")
+    project = Projects.query.filter_by(name=projectname).first()
+    db.session.delete(project)
     db.session.commit()
 
 @manager.command
@@ -71,7 +80,7 @@ def delete_relation():
     "Delete relation of an user with a project."
     user = Users.query.filter_by(username=input("Username:")).first()
     project = Projects.query.filter_by(name=input("Project Name:")).first()
-    user.projects.delete(project)
+    user.projects.remove(project)
     db.session.commit()
 
 if __name__ == '__main__':
