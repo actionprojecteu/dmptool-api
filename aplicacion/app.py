@@ -1,4 +1,4 @@
-########## Imports ##########
+################# Imports #################
 from flask import Flask, redirect, url_for, request, abort, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
@@ -13,7 +13,7 @@ import json
 import logging
 
 
-########## Initialize ##########
+################# Initialize #################
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -43,7 +43,7 @@ def start():
         return jsonify(message="It is neccesary to be logged."), 401
 
 
-########## login part ##########
+################# login part #################
 
 @app.route('/login')
 def login():
@@ -120,13 +120,14 @@ def changepassword():
         return jsonify(error="Unauthenticated. Error in the token."), 401
 
 
-########## dmps part ##########
+################# dmps part #################
+
 # DMP format: { "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
 @app.route('/dmps', methods=['GET'])
 @jwt_required
 def get_all_dmps():
-    dmps = mongo.db.dmps.find()
+    dmps = mongo.db.dmps.find({'user': get_jwt_identity()})
     output = []
     for dmp in dmps:
         output.append(dmp)
@@ -170,7 +171,7 @@ def get_dmp(dmp_id):
     return JSONEncoder().encode(dmp)
 
 
-########## asks part ##########
+################# tasks part #################
 
 ## Format task = {status, url, dmp}
 ## Stauts: pending, finished, error
@@ -202,7 +203,7 @@ def post_task():
     return jsonify({'ok': True, 'message': 'Task created successfully.'}), 201
 
 
-########## Tokens JWT part ##########
+################# Tokens JWT part #################
 
 @app.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
@@ -215,7 +216,7 @@ def check_if_token_in_blacklist(decrypted_token):
     return jti in blacklist
 
 
-########## Error handler part ##########
+################# Error handler part #################
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -226,7 +227,7 @@ def unauthorized(error):
     return jsonify({'error':"Unauthorized."}), 401
 
 
-########## Resources (class) ##########
+################# Resources (class) #################
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):

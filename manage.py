@@ -43,6 +43,13 @@ def create_user():
     db.session.commit()
 
 @manager.command
+def delete_user():
+    "Delate an user."
+    username= input("Username:")
+    user = Users.query.filter_by(username=username).first()
+    db.session.delete(user)
+
+@manager.command
 def create_project():
     "Create a project."
     project = {"name": input("Name:"),
