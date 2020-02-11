@@ -4,14 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
-from logging import handlers
+from logging.handlers import RotatingFileHandler
 from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
     jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt
-import os
-import json
 import logging
+import json
+import os
+
 
 ##################### Initialize #####################
 
@@ -33,7 +34,7 @@ logging.basicConfig(filename='log/info.log',
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
     )
-my_logger.addHandler(logging.handlers.RotatingFileHandler('log/info.log', maxBytes=512, backupCount=20))
+my_logger.addHandler(logging.handlers.RotatingFileHandler('log/info.log', maxBytes=1000000, backupCount=20))
 
 
 @app.before_request
@@ -169,8 +170,8 @@ def get_dmp(dmp_id):
     try:
         dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
     except Exception as e:
-        app.logger.warning("Not a correct dmp id format.")
-        return jsonify(error="Not a correct dmp id format."), 400
+        app.logger.warning("Not a correct dmp id.")
+        return jsonify(error="Not a correct dmp id."), 400
     if dmp is None:
         app.logger.warning('DMP %s not found.', dmp_id)
         return jsonify({'error': 'DMP ' + dmp_id + 'not found.'}), 404
@@ -189,10 +190,22 @@ def put_dmp(dmp_id):
     try:
         mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     except Exception as e:
-        app.logger.warning("Not a correct dmp id format: %s .", dmp_id)
-        return jsonify(error="Not a correct dmp id format."), 400
+        app.logger.warning("Not a correct dmp id: %s .", dmp_id)
+        return jsonify(error="Not a correct dmp id."), 400
     app.logger.info('dmp %s updated by %s successfully.', dmp_id, get_jwt_identity())
     return jsonify({'id':dmp_id, 'ok': True, 'message': 'DMP updated successfully.'})
+
+
+@app.route('/dmps/<dmp_id>', methods=['DELETE'])
+@jwt_required
+def delete_dmp(dmp_id):
+    try:
+        mongo.db.dmps.delete_one({"_id": ObjectId(dmp_id)})
+    except Exception as e:
+        app.logger.warning("Not a correct dmp id: %s .", dmp_id)
+        return jsonify(error="Not a correct dmp id."), 400
+    app.logger.info('dmp %s delete by %s successfully.', dmp_id, get_jwt_identity())
+    return jsonify({'id':dmp_id, 'ok': True, 'message': 'DMP delete successfully.'})
 
 
 ##################### tasks part #####################
