@@ -1,9 +1,10 @@
-################# Imports #################
+##################### Imports #####################
 from flask import Flask, request, abort, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
+from logging import handlers
 from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
@@ -11,10 +12,8 @@ from flask_jwt_extended import JWTManager, create_access_token, create_refresh_t
 import os
 import json
 import logging
-from logging import handlers
-from waitress import serve
 
-################# Initialize #################
+##################### Initialize #####################
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -27,21 +26,22 @@ jwt = JWTManager(app)
 blacklist = set()
 
 
-################# logging part #################
+##################### logging part #####################
 
 my_logger = logging.getLogger('waitress')
 logging.basicConfig(filename='log/info.log',
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
     )
-my_logger.addHandler(logging.handlers.RotatingFileHandler('log/info.log', maxBytes=2048, backupCount=20))
+my_logger.addHandler(logging.handlers.RotatingFileHandler('log/info.log', maxBytes=512, backupCount=20))
+
 
 @app.before_request
 def before_request():
     app.logger.info('Request with method: %s for the uri: %s', request.method, request.endpoint)
 
 
-################# Test part #################
+##################### Test part #####################
 
 @app.route('/')
 def hello_world():
@@ -56,7 +56,7 @@ def start():
         return jsonify(message="It is neccesary to be logged."), 401
 
 
-################# login part #################
+##################### login part #####################
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -135,7 +135,7 @@ def changepassword():
         return jsonify(error="Unauthenticated. Error in the token."), 401
 
 
-################# dmps part #################
+##################### dmps part #####################
 
 # DMP format: { "user":"esteban","project":"street-spectra", "purpose":"collection of elements", "sharing":yes, "license":"cc-by"}
 
@@ -195,7 +195,7 @@ def put_dmp(dmp_id):
     return jsonify({'id':dmp_id, 'ok': True, 'message': 'DMP updated successfully.'})
 
 
-################# tasks part #################
+##################### tasks part #####################
 
 ## Format task = {status, url, dmp}
 ## Stauts: pending, finished, error
@@ -212,7 +212,9 @@ def get_all_tasks():
     output = []
     for task in tasks:
         output.append(task)
+    app.logger.info('%s received tasks successfully.', get_jwt_identity())
     return JSONEncoder().encode(output)
+
 
 @app.route('/tasks', methods=['POST'])
 @jwt_required
@@ -224,15 +226,18 @@ def post_task():
         return jsonify(error="Failed to decode JSON object."), 400
     data.update({'status':'pending'})
     _id = mongo.db.tasks.insert_one(data).inserted_id
+    app.logger.info('task %s created by %s successfully.', str(_id), get_jwt_identity())
     return jsonify({'id':str(_id), 'ok': True, 'message': 'Task created successfully.'}), 201
 
 
-################# Tokens JWT part #################
+##################### Tokens JWT part #####################
 
 @app.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
+    app.logger.info('%s refresh his token successfully.', get_jwt_identity())
     return jsonify(access_token= create_access_token(identity=get_jwt_identity())), 201
+
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
@@ -240,18 +245,25 @@ def check_if_token_in_blacklist(decrypted_token):
     return jti in blacklist
 
 
-################# Error handler part #################
+##################### Error handler part #####################
 
 @app.errorhandler(404)
 def page_not_found(error):
+    app.logger.error('Page not found. Method: %s uri: %s', request.method, request.endpoint)
     return jsonify({'error':"Page not found..."}), 404
 
 @app.errorhandler(401)
 def unauthorized(error):
+    app.logger.error('Unauthorized. Method: %s uri: %s', request.method, request.endpoint)
     return jsonify({'error':"Unauthorized."}), 401
 
+@app.errorhandler(405)
+def method_not_allowed(error):
+    app.logger.error('Method not allowed. Method: %s uri: %s', request.method, request.endpoint)
+    return jsonify({'error':"Method not allowed."}), 401
 
-################# Resources (class) #################
+
+##################### Resources (class) #####################
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
