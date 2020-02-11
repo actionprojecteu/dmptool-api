@@ -9,7 +9,7 @@ class Projects(db.Model):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
+    description = Column(Text, nullable=True, default="none")
 
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))

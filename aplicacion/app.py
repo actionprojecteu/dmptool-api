@@ -1,5 +1,5 @@
 ################# Imports #################
-from flask import Flask, redirect, url_for, request, abort, session, jsonify
+from flask import Flask, request, abort, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
@@ -25,10 +25,10 @@ jwt = JWTManager(app)
 
 blacklist = set()
 
-# logging.basicConfig(filename='log/error.log',
-#     level=logging.INFO,
-#     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
-#     )
+logging.basicConfig(filename='log/info.log',
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
+    )
 
 @app.route('/')
 def hello_world():
@@ -38,7 +38,7 @@ def hello_world():
 @jwt_optional
 def start():
     if get_jwt_identity():
-        return redirect(url_for("hello_world"))
+        return hello_world()
     else:
         return jsonify(message="It is neccesary to be logged."), 401
 
@@ -48,18 +48,21 @@ def start():
 @app.route('/login', methods=['GET'])
 def login():
     if get_jwt_identity() is not None:
-        return jsonify(message="User already logged: " + current_user.username)
+        return jsonify(message="User already logged: " + get_jwt_identity())
 
     try:
         username=request.authorization["username"]
         password=request.authorization["password"]
     except Exception as e:
-            print(e)
+            app.logger.warning('Exception: no username or password in Basic authorization header.')
             return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
     from aplicacion.models import Users, Projects
     user = Users.query.filter_by(username=username).first()
     if user is not None and user.verify_password(password):
+        accesstoken = create_access_token(identity = username)
+        refreshtoken = create_refresh_token(identity = username)
+        app.logger.info('%s logged in successfully.', user.username)
 
         # userprojects = Projects.query.filter(Projects.users.any(id=user.id)).all()
         # nameprojects=""
@@ -68,8 +71,6 @@ def login():
         #     if i < len(userproject) - 1:
         #         nameprojects+=","
         userproject = Projects.query.filter(Projects.users.any(id=user.id)).first()
-        accesstoken = create_access_token(identity = username)
-        refreshtoken = create_refresh_token(identity = username)
 
         if userproject is not None:
             return jsonify(
@@ -90,6 +91,7 @@ def login():
                 refresh_token= refreshtoken
                 )
     else:
+        app.logger.warning("Unauthenticated. Error in log in.")
         return jsonify(error="Unauthenticated. Error in log in."), 401
 
 
@@ -98,7 +100,8 @@ def login():
 def logout():
     jti = get_raw_jwt()['jti']
     blacklist.add(jti)
-    return jsonify({"msg": "Successfully logged out"}), 204
+    app.logger.info('%s logged out successfully.', get_jwt_identity())
+    return jsonify(message= "Successfully logged out.")
 
 
 @app.route('/changepassword', methods=['PUT'])
@@ -107,16 +110,18 @@ def changepassword():
     try:
         newpassword=request.headers['newpassword']
     except Exception as e:
-        print(e)
-        return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 400
+        app.logger.warning("Exception. The newpassword is not in the headers.")
+        return jsonify(error="Error. The newpassword is not in the headers."), 400
 
     from aplicacion.models import Users
     user = Users.query.filter_by(username=get_jwt_identity()).first()
     if user is not None:
         user.password = newpassword
         db.session.commit()
+        app.logger.info('%s changed password successfully.', get_jwt_identity())
         return jsonify(message="Password change successfully."), 200
     else:
+        app.logger.warning("Unauthenticated. Error in the token.")
         return jsonify(error="Unauthenticated. Error in the token."), 401
 
 
@@ -140,10 +145,10 @@ def post_dmp():
     try:
         data = request.get_json(force=True)
     except Exception as e:
-            print(e)
-            return jsonify(error="Failed to decode JSON object."), 400
-    mongo.db.dmps.insert_one(data)
-    return jsonify({'ok': True, 'message': 'DMP created successfully.'}), 201 
+        app.logger.warning("Failed to decode JSON object.")
+        return jsonify(error="Failed to decode JSON object."), 400
+    _id = mongo.db.dmps.insert_one(data).inserted_id
+    return jsonify({'id':str(_id), 'ok': True, 'message': 'DMP created successfully.'}), 201 
 
 
 @app.route('/dmps/<dmp_id>', methods=['GET'])
@@ -152,8 +157,8 @@ def get_dmp(dmp_id):
     try:
         dmp = mongo.db.dmps.find_one({'_id': ObjectId(dmp_id)})
     except Exception as e:
-            print(e)
-            return jsonify(error="Not a correct dmp id format."), 400
+        app.logger.warning("Not a correct dmp id format.")
+        return jsonify(error="Not a correct dmp id format."), 400
     if dmp is None:
         return jsonify({'error': 'DMP ' + dmp_id + 'not found.'}), 404
     return JSONEncoder().encode(dmp)
@@ -165,8 +170,8 @@ def put_dmp(dmp_id):
     try:
         data = request.get_json(force=True)
     except Exception as e:
-            print(e)
-            return jsonify(error="Failed to decode JSON object."), 400
+        app.logger.warning("Failed to decode JSON object.")
+        return jsonify(error="Failed to decode JSON object."), 400
     try:
         mongo.db.dmps.update({"_id": ObjectId(dmp_id)}, {"$set": data})
     except Exception as e:
@@ -194,17 +199,17 @@ def get_all_tasks():
         output.append(task)
     return JSONEncoder().encode(output)
 
-@app.route('/task', methods=['POST'])
+@app.route('/tasks', methods=['POST'])
 @jwt_required
 def post_task():
     try:
         data = request.get_json(force=True)
     except Exception as e:
-            print(e)
-            return jsonify(error="Failed to decode JSON object."), 400
+        app.logger.warning("Failed to decode JSON object.")
+        return jsonify(error="Failed to decode JSON object."), 400
     data.update({'status':'pending'})
-    mongo.db.tasks.insert_one(data)
-    return jsonify({'ok': True, 'message': 'Task created successfully.'}), 201
+    _id = mongo.db.tasks.insert_one(data).inserted_id
+    return jsonify({'id':str(_id), 'ok': True, 'message': 'Task created successfully.'}), 201
 
 
 ################# Tokens JWT part #################
