@@ -11,7 +11,8 @@ from flask_jwt_extended import JWTManager, create_access_token, create_refresh_t
 import os
 import json
 import logging
-
+from logging import handlers
+from waitress import serve
 
 ################# Initialize #################
 
@@ -25,10 +26,14 @@ jwt = JWTManager(app)
 
 blacklist = set()
 
+my_logger = logging.getLogger('waitress')
 logging.basicConfig(filename='log/info.log',
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
     )
+handler = logging.handlers.RotatingFileHandler('log/info.log', maxBytes=2048, backupCount=20)
+my_logger.addHandler(handler)
+
 
 @app.route('/')
 def hello_world():

@@ -87,10 +87,12 @@ def delete_relation():
 
 
 @manager.command
-def runprodserver():
+@manager.option('-h', '--host', dest='host', default='0.0.0.0')
+@manager.option('-p', '--port', dest='port', default=5000)
+def runprodserver(host='0.0.0.0',port=5000):
     "Run flask server in a production enviroment."
     from waitress import serve
-    serve(app, host='0.0.0.0', port=5000)
+    serve(app, host=host, port=port)
 
 
 if __name__ == '__main__':
