@@ -1,4 +1,4 @@
-from flask_script import Manager
+from flask_script import Manager, prompt_bool
 from aplicacion.app import app, db
 from aplicacion.models import *
 from getpass import getpass
@@ -13,11 +13,11 @@ def create_tables():
     db.create_all()
     db.session.commit()
 
-
 @manager.command
 def drop_tables():
     "Drop all project relational database tables. THIS DELETES ALL DATA."
-    db.drop_all()
+    if prompt_bool("Are you sure you want to lose all your data:"):
+        db.drop_all()
 
 
 @manager.command
@@ -50,6 +50,7 @@ def delete_user():
     db.session.delete(user)
     db.session.commit()
 
+
 @manager.command
 def create_project():
     "Create a project."
@@ -67,6 +68,7 @@ def delete_project():
     db.session.delete(project)
     db.session.commit()
 
+
 @manager.command
 def create_relation():
     "Relation an user with a project."
@@ -82,6 +84,14 @@ def delete_relation():
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.remove(project)
     db.session.commit()
+
+
+@manager.command
+def runprodserver():
+    "Run flask server in a production enviroment."
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=5000)
+
 
 if __name__ == '__main__':
     manager.run()
