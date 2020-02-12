@@ -2,7 +2,7 @@
 
 from flask import Flask, request, abort, session, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from aplicacion import config
+from application import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from logging.handlers import RotatingFileHandler
@@ -73,7 +73,7 @@ def login():
         app.logger.warning('Exception: no username or password in Basic authorization header.')
         return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
-    from aplicacion.models import Users, Projects
+    from application.models import Users, Projects
     user = Users.query.filter_by(username=username).first()
     if user is not None and user.verify_password(password):
         accesstoken = create_access_token(identity = username)
@@ -129,7 +129,7 @@ def changepassword():
         app.logger.warning("Exception. The newpassword is not in the headers.")
         return jsonify(error="Error. The newpassword is not in the headers."), 400
 
-    from aplicacion.models import Users
+    from application.models import Users
     user = Users.query.filter_by(username=get_jwt_identity()).first()
     if user is not None:
         user.password = newpassword
