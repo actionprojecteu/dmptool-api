@@ -23,7 +23,7 @@ The api files in order are:
 ### Manage.py
 
 manage.py is the main python file of the api and it is used by command line. The possibles commands are:
-- Manage tables: manage the tables of the sql database.
+ - Manage tables: manage the tables of the sql database.
  	- Create tables: create the tables of the sql database.
 ```
 python manage.py create_tables
