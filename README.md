@@ -3,7 +3,7 @@
 
 ## What is it?
 
-dmptool-api is the backend of the dmptool application, which it generate data managment plans for the [ACTION](https://actionproject.eu/) projects.
+dmptool-api is the backend of the [dmptool application](https://github.com/actionprojecteu/dmptool), which it generate data managment plans for the [ACTION](https://actionproject.eu/) projects.
 
 
 ## Files
@@ -59,17 +59,17 @@ The api files in order are:
 
 [app.py](application/app.py) controls the flask server in production and development mode. The differents URIs and methods that are in the server are:
  - Login: manage the user sessions.
- 	- /login : a user log in the server.
+ 	- /login : the user log in the server.
  		- Method: GET
  		- Request: basic authorization header from a user.
  		- Response: json object with the username, email, project, project_description, access_token and refresh_token.
  		- Status code: 200
- 	- /logout : a user logout the server.
+ 	- /logout : the user logout of the server.
  		- Method: DELETE
  		- Request: bearer token of a user.
  		- Response: json object with a msg of success.
  		- Status code: 200
- 	- /changepassword : a user change his password.
+ 	- /changepassword : the user changes his password.
  		- Method: PUT
  		- Request: bearer token of a user and newpassword in the header.
  		- Response: json object with a msg of success.
@@ -100,5 +100,47 @@ The api files in order are:
  		- Request: bearer token of a user.
  		- Response: json object with a msg of success and the id of the dmp deleted.
  		- Status code: 200
+ - Task: manage the task of the mongodb.
+ 	- /tasks : return all the task. It could be flter by the status parameter.
+ 		- Method: GET
+ 		- Request: bearer token of a user and an optional status parameter.
+ 		- Response: json object with all the requested tasks.
+ 		- Status code: 200
+ 	- /tasks : create a new task.
+ 		- Method: POST
+ 		- Request: bearer token of a user and a task (json) in the body.
+ 		- Response: json object with a msg of success and the id of the task generated.
+ 		- Status code: 201
+ - File: send files of the dmp.
+ 	- /resources/docx/<file_id> : return the file_id.docx file.
+ 		- Method: GET
+ 		- Request: bearer token of a user.
+ 		- Response: file_id.docx file.
+ 		- Status code: 200
+ 	- /resources/pdf/<file_id> : return the file_id.pdf file.
+ 		- Method: GET
+ 		- Request: bearer token of a user.
+ 		- Response: file_id.pdf file.
+ 		- Status code: 200
+ - Token: manage user tokens.
+ 	- /refresh : return the file_id.docx file.
+ 		- Method: GET
+ 		- Request: refresh token of a user.
+ 		- Response: json object with a new access_token.
+ 		- Status code: 200
+ - Test: some test routes that will be deleted in the future.
 
+
+
+
+
+
+
+## Future tasks
+
+- [x] Create README.md
+- [ ] Finish README.md
+- [ ] Delete test routes
+- [ ] Update timestamp in the creation of the task.
+ 	
 
