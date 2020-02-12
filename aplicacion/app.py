@@ -42,9 +42,9 @@ my_logger.addHandler(logging.handlers.RotatingFileHandler('log/info.log', maxByt
 @jwt_optional
 def before_request():
     if get_jwt_identity():
-        app.logger.info('Request with method: %s for the uri %s from the user %s .', request.method, request.endpoint, get_jwt_identity())
+        app.logger.info('Request with method: %s for the uri %s from the user %s .', request.method, request.path, get_jwt_identity())
     else:
-        app.logger.info('Request with method: %s for the uri %s .', request.method, request.endpoint)
+        app.logger.info('Request with method: %s for the uri %s .', request.method, request.path)
 
 
 ##################### Test part #####################
@@ -188,7 +188,6 @@ def get_dmp(dmp_id):
 @app.route('/dmps/<dmp_id>', methods=['PUT'])
 @jwt_required
 def put_dmp(dmp_id):
-    dmps = mongo.db.dmps.find({'user': get_jwt_identity()})
     try:
         data = request.get_json(force=True)
     except Exception as e:
@@ -307,19 +306,34 @@ def check_if_token_in_blacklist(decrypted_token):
 ##################### Error handler part #####################
 
 @app.errorhandler(404)
+@jwt_optional
 def page_not_found(error):
-    app.logger.error('Page not found. Method: %s uri: %s', request.method, request.endpoint)
-    return jsonify({'error':"Page not found..."}), 404
+    if get_jwt_identity():
+        app.logger.error('Page not found. Method: %s uri: %s user: %s', request.method, request.path, get_jwt_identity())
+        return jsonify({'error':"Page not found..."}), 404
+    else:
+        app.logger.error('Page not found. Method: %s uri: %s', request.method, request.path)
+        return jsonify({'error':"Page not found..."}), 404
 
 @app.errorhandler(401)
+@jwt_optional
 def unauthorized(error):
-    app.logger.error('Unauthorized. Method: %s uri: %s', request.method, request.endpoint)
-    return jsonify({'error':"Unauthorized."}), 401
+    if get_jwt_identity():
+        app.logger.error('Unauthorized. Method: %s uri: %s user: %s', request.method, request.path, get_jwt_identity())
+        return jsonify({'error':"Unauthorized"}), 404
+    else:
+        app.logger.error('Unauthorized. Method: %s uri: %s', request.method, request.path)
+        return jsonify({'error':"Unauthorized."}), 401
 
 @app.errorhandler(405)
+@jwt_optional
 def method_not_allowed(error):
-    app.logger.error('Method not allowed. Method: %s uri: %s', request.method, request.endpoint)
-    return jsonify({'error':"Method not allowed."}), 401
+    if get_jwt_identity():
+        app.logger.error('Method not allowed. Method: %s uri: %s user: %s', request.method, request.path, get_jwt_identity())
+        return jsonify({'error':"Method not allowed."}), 404
+    else:
+        app.logger.error('Method not allowed. Method: %s uri: %s', request.method, request.path)
+        return jsonify({'error':"Method not allowed."}), 401
 
 
 ##################### Resources (class) #####################
