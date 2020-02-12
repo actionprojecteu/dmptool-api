@@ -1,5 +1,5 @@
 ##################### Imports #####################
-from flask import Flask, request, abort, session, jsonify
+from flask import Flask, request, abort, session, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from aplicacion import config
 from werkzeug.utils import secure_filename
@@ -251,6 +251,38 @@ def post_task():
     app.logger.info('task %s created by %s successfully.', str(_id), get_jwt_identity())
     return jsonify({'id':str(_id), 'ok': True, 'message': 'Task created successfully.'}), 201
 
+
+##################### File part #####################
+
+@app.route('/return-files/docx')
+@jwt_optional
+def return_files_docx():
+    # if get_jwt_identity():
+
+    try:
+        return send_file("../documents/Nuevo Documento de Microsoft Word.docx",
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                attachment_filename='dmp.docx',
+                as_attachment=True)
+    except Exception as e:
+        app.logger.warning("Failed to send the docx file.")
+        return jsonify(error="Failed to send the docx file."), 400
+
+
+@app.route('/return-files/pdf')
+@jwt_optional
+def return_files_pdf():
+    # if get_jwt_identity():
+
+    try:
+        return send_file("../documents/Create a Kubernetes Cluster.pdf",
+                mimetype='application/pdf',
+                attachment_filename='dmp.pdf',
+                as_attachment=True)
+    except Exception as e:
+        app.logger.warning("Failed to send the pdf file.")
+        return jsonify(error="Failed to send the pdf file."), 400
+    
 
 ##################### Tokens JWT part #####################
 
