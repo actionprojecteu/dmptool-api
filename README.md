@@ -27,7 +27,7 @@ manage.py is the main python file of the api and it is used by command line. The
  	- Create tables: create the tables of the sql database.
 `python manage.py create_tables`
  	- Delete tables: delete all the tables of the sql database (**Deletes all data**).
-`python manage.py drop_tables`
+<br/>`python manage.py drop_tables`<br/>
  - Manage users: manage the user of the sql database.
  	- Create a normal user: username, password and email is required (promt input).
 `python manage.py create_user`
