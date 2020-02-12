@@ -22,7 +22,7 @@ The api files in order are:
 
 ### Manage.py
 
-manage.py is the main python file of the api and it is used by command line. The possibles commands are:
+[manage.py](manage.py) is the main python file of the api and it is used by command line. The possibles commands are:
  - Manage tables: manage the tables of the sql database.
  	- Create tables: create the tables of the sql database.
 <br/>`python manage.py create_tables`
@@ -33,19 +33,72 @@ manage.py is the main python file of the api and it is used by command line. The
 <br/>`python manage.py create_user`
  	- Create an admin user: username, password and email is required (promt input).
 <br/>`python manage.py create_admin`
- 	- Delete an user: username is required (promt input).
+ 	- Delete a user: username is required (promt input).
 <br/>`python manage.py delete_user`
  - Manage projects: manage the projects of the sql database.
  	- Create a project: project and description is required (promt input).
-`python manage.py create_user`
+<br/>`python manage.py create_user`
  	- Delete a project: project is required (promt input).
-`python manage.py delete_user`
+<br/>`python manage.py delete_user`
  - Manage user-project relationship: manage the relaion many-to-many between users and projects of the sql database.
- 	- Create an user-project relationship: username and project name is required (promt input).
-`python manage.py create_relation`
- 	- Delete an user-project relationship: project is required (promt input).
-`python manage.py delete_relation`
+ 	- Create a user-project relationship: username and project name is required (promt input).
+<br/>`python manage.py create_relation`
+ 	- Delete a user-project relationship: project is required (promt input).
+<br/>`python manage.py delete_relation`
+ - Start server: start the python server from app.py.
+ 	- Development mode: start the development server. Optionals parameters: host (-h, --host), port (-p, --port).
+<br/>`python manage.py runserver`
+ 	- Production mode: start the production server. Optionals parameters: host (-h, --host), port (-p, --port).
+<br/>`python manage.py runprodserver`
+ - Help: print the commands with their description.
+<br/>`python manage.py -?`
+<br/>It could use with others commands to get more info of them. For example:
+<br/>`python manage.py runserver -?`
 
+### App.py
 
+[app.py](application/app.py) controls the flask server in production and development mode. The differents URIs and methods that are in the server are:
+ - Login: manage the user sessions.
+ 	- /login : a user log in the server.
+ 		- Method: GET
+ 		- Request: basic authorization header from a user.
+ 		- Response: json object with the username, email, project, project_description, access_token and refresh_token.
+ 		- Status code: 200
+ 	- /logout : a user logout the server.
+ 		- Method: DELETE
+ 		- Request: bearer token of a user.
+ 		- Response: json object with a msg of success.
+ 		- Status code: 200
+ 	- /changepassword : a user change his password.
+ 		- Method: PUT
+ 		- Request: bearer token of a user and newpassword in the header.
+ 		- Response: json object with a msg of success.
+ 		- Status code: 200
+ - Dmp: manage the data managment plan of the mongodb.
+ 	- /dmps : return all the dmps of a user.
+ 		- Method: GET
+ 		- Request: bearer token of a user.
+ 		- Response: json object with a list of dmps.
+ 		- Status code: 200
+ 	- /dmps : create a new user dmp.
+ 		- Method: POST
+ 		- Request: bearer token of a user and a dmp (json) in the body.
+ 		- Response: json object with a msg of success and the id of the dmp generated.
+ 		- Status code: 201
+ 	- /dmps/<dmp_id> : return the dmp with the dmp_id of a user.
+ 		- Method: GET
+ 		- Request: bearer token of a user.
+ 		- Response: json object the requested dmp.
+ 		- Status code: 200
+ 	- /dmps/<dmp_id> : return the dmp with the dmp_id of a user.
+ 		- Method: PUT
+ 		- Request: bearer token of a user and a json in the body with the keys and values that need to be updated.
+ 		- Response: json object with a msg of success and the id of the dmp updated.
+ 		- Status code: 200
+ 	- /dmps/<dmp_id> : delete a dmp with the dmp_id of a user.
+ 		- Method: DELETE
+ 		- Request: bearer token of a user.
+ 		- Response: json object with a msg of success and the id of the dmp deleted.
+ 		- Status code: 200
 
 
