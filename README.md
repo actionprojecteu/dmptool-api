@@ -25,33 +25,42 @@ The api files in order are:
 manage.py is the main python file of the api and it is used by command line. The possibles commands are:
  - Manage tables: manage the tables of the sql database.
  	- Create tables: create the tables of the sql database.
+
 `python manage.py create_tables`
 
  	- Delete tables: delete all the tables of the sql database (**Deletes all data**).
+
 `python manage.py drop_tables`
 
  - Manage users: manage the user of the sql database.
  	- Create a normal user: username, password and email is required (promt input).
+
 `python manage.py create_user`
 
  	- Create an admin user: username, password and email is required (promt input).
+
 `python manage.py create_admin`
 
  	- Delete an user: username is required (promt input).
+
 `python manage.py delete_user`
 
  - Manage projects: manage the projects of the sql database.
  	- Create a project: project and description is required (promt input).
+
 `python manage.py create_user`
 
  	- Delete a project: project is required (promt input).
+
 `python manage.py delete_user`
 
  - Manage user-project relationship: manage the relaion many-to-many between users and projects of the sql database.
  	- Create an user-project relationship: username and project name is required (promt input).
+
 `python manage.py create_relation`
 
  	- Delete an user-project relationship: project is required (promt input).
+ 	
 `python manage.py delete_relation`
 
 
