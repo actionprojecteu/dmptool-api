@@ -28,6 +28,7 @@ manage.py is the main python file of the api and it is used by command line. The
 ```
 python manage.py create_tables
 ```
+
  	- Delete tables: delete all the tables of the sql database (**Deletes all data**).
 ```
 python manage.py drop_tables
@@ -38,10 +39,12 @@ python manage.py drop_tables
 ```
 python manage.py create_user
 ```
+
  	- Create an admin user: username, password and email is required (promt input).
 ```
 python manage.py create_admin
 ```
+
  	- Delete an user: username is required (promt input).
 ```
 python manage.py delete_user
@@ -52,6 +55,7 @@ python manage.py delete_user
 ```
 python manage.py create_user
 ```
+
  	- Delete a project: project is required (promt input).
 ```
 python manage.py delete_user
@@ -62,6 +66,7 @@ python manage.py delete_user
 ```
 python manage.py create_relation
 ```
+
  	- Delete an user-project relationship: project is required (promt input).
 ```
 python manage.py delete_relation
