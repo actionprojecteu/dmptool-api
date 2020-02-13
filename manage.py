@@ -1,6 +1,6 @@
 from flask_script import Manager, prompt_bool
-from aplicacion.app import app, db
-from aplicacion.models import *
+from application.app import app, db
+from application.models import *
 from getpass import getpass
 
 manager = Manager(app)

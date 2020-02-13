@@ -2,7 +2,7 @@
 
 from flask import Flask, request, abort, session, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from aplicacion import config
+from application import config
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from logging.handlers import RotatingFileHandler
@@ -73,7 +73,7 @@ def login():
         app.logger.warning('Exception: no username or password in Basic authorization header.')
         return jsonify(error="Unauthenticated. Not basic auth send with username or password."), 401
 
-    from aplicacion.models import Users, Projects
+    from application.models import Users, Projects
     user = Users.query.filter_by(username=username).first()
     if user is not None and user.verify_password(password):
         accesstoken = create_access_token(identity = username)
@@ -94,8 +94,8 @@ def login():
                 email=user.email,
                 project=userproject.name,
                 project_description=userproject.description,
-                access_token= accesstoken,
-                refresh_token= refreshtoken
+                access_token=accesstoken,
+                refresh_token=refreshtoken
                 )
         else:
             return jsonify(
@@ -103,8 +103,8 @@ def login():
                 email=user.email,
                 project="none",
                 project_description="",
-                access_token= accesstoken,
-                refresh_token= refreshtoken
+                access_token=accesstoken,
+                refresh_token=refreshtoken
                 )
     else:
         app.logger.warning("Unauthenticated. Error in log in.")
@@ -129,7 +129,7 @@ def changepassword():
         app.logger.warning("Exception. The newpassword is not in the headers.")
         return jsonify(error="Error. The newpassword is not in the headers."), 400
 
-    from aplicacion.models import Users
+    from application.models import Users
     user = Users.query.filter_by(username=get_jwt_identity()).first()
     if user is not None:
         user.password = newpassword
@@ -181,7 +181,7 @@ def get_dmp(dmp_id):
     if dmp is None:
         app.logger.warning('DMP %s not found.', dmp_id)
         return jsonify({'error': 'DMP ' + dmp_id + 'not found.'}), 404
-    app.logger.info('%s received %s successfully.', get_jwt_identity(), dmp_id)
+    app.logger.info('%s received %s dmp successfully.', get_jwt_identity(), dmp_id)
     return JSONEncoder().encode(dmp)
 
 
@@ -256,9 +256,24 @@ def post_task():
     return jsonify({'id':str(_id), 'ok': True, 'msg': 'Task created successfully.'}), 201
 
 
+@app.route('/tasks/<tasks_id>', methods=['GET'])
+@jwt_required
+def get_task(tasks_id):
+    try:
+        tasks = mongo.db.tasks.find_one({'_id': ObjectId(tasks_id)})
+    except Exception as e:
+        app.logger.warning("Not a correct tasks id.")
+        return jsonify(error="Not a correct tasks id."), 400
+    if tasks is None:
+        app.logger.warning('Task %s not found.', tasks_id)
+        return jsonify({'error': 'Task ' + tasks_id + 'not found.'}), 404
+    app.logger.info('%s received %s task successfully.', get_jwt_identity(), tasks_id)
+    return JSONEncoder().encode(tasks)
+
+
 ##################### File part #####################
 
-@app.route('/resources/docx/<file_id>')
+@app.route('/resources/docx/<file_id>', methods=['GET'])
 @jwt_required
 def return_files_docx(file_id):
     try:
@@ -273,7 +288,7 @@ def return_files_docx(file_id):
         return jsonify(error="Failed to send the docx file."), 400
 
 
-@app.route('/resources/pdf/<file_id>')
+@app.route('/resources/pdf/<file_id>', methods=['GET'])
 @jwt_required
 def return_files_pdf(file_id):
     try:
