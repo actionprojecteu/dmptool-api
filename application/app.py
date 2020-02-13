@@ -284,32 +284,32 @@ def get_task(tasks_id):
 ##################### File part #####################
 
 @app.route('/resources/docx/<file_id>', methods=['GET'])
-@jwt_required
+@jwt_optional
 def return_files_docx(file_id):
     try:
-        app.logger.info("User %s require document %s.docx.", get_jwt_identity(), file_id)
-        return send_from_directory('../documents', filename= file_id + '.docx',
+        app.logger.info("User %s require document %s .", get_jwt_identity(), file_id)
+        return send_from_directory('../documents', filename= file_id,
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             attachment_filename='dmp.docx',
             as_attachment=True,
             cache_timeout=0)
     except Exception as e:
-        app.logger.warning("Failed to send the %s.docx file to %s.", file_id, get_jwt_identity())
+        app.logger.warning("Failed to send the %s file to %s.", file_id, get_jwt_identity())
         return jsonify(error="Failed to send the docx file."), 400
 
 
 @app.route('/resources/pdf/<file_id>', methods=['GET'])
-@jwt_required
+@jwt_optional
 def return_files_pdf(file_id):
     try:
-        app.logger.info("User %s require document %s.pdf.", get_jwt_identity(), file_id)
-        return send_from_directory('../documents', filename= file_id + '.pdf',
+        app.logger.info("User %s require document %s .", get_jwt_identity(), file_id)
+        return send_from_directory('../documents', filename= file_id,
             mimetype='application/pdf',
             attachment_filename='dmp.pdf',
             as_attachment=True,
             cache_timeout=0)
     except Exception as e:
-        app.logger.warning("Failed to send the %s.pdf file to %s.", file_id, get_jwt_identity())
+        app.logger.warning("Failed to send the %s file to %s.", file_id, get_jwt_identity())
         return jsonify(error="Failed to send the pdf file."), 400
     
 
