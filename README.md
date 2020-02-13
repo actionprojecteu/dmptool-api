@@ -101,9 +101,9 @@ The api files in order are:
  		- Response: json object with a msg of success and the id of the dmp deleted.
  		- Status code: 200
  - **Task**: manage the task of the mongodb.
- 	- /tasks : return all the task. It could be flter by the status parameter.
+ 	- /tasks : return all the task in descending order of creation. It could be flter by the status and/or dmp id parameter.
  		- Method: GET
- 		- Request: bearer token of a user and an optional status parameter.
+ 		- Request: bearer token of a user and an optional status and dmp id parameters.
  		- Response: json object with all the requested tasks.
  		- Status code: 200
  	- /tasks : create a new task.
@@ -130,8 +130,13 @@ The api files in order are:
  		- Status code: 200
  - **Test**: some test routes that will be deleted in the future.
 
+### Models.py
 
-
+[models.py](application/models.py) contains the model for the tables of the sql database. As you can see in the image, the differents tables of the database are:
+<br/>![Model of sqlite3](https://ibb.co/pzMtZxR)
+ - **User**: 
+ 	- hola
+ - **Project**: 
 
 
 
@@ -142,5 +147,8 @@ The api files in order are:
 - [ ] Finish README.md
 - [ ] Delete test routes
 - [ ] Update timestamp in the creation of the task.
+- [X] Added timestamp to tasks.
+- [X] Filter task by id dmp.
+- [X] Order task by timestamp.
  	
 
