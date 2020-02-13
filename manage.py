@@ -44,7 +44,7 @@ def create_user():
 
 @manager.command
 def delete_user():
-    "Delate an user."
+    "Delate a user."
     username= input("Username:")
     user = Users.query.filter_by(username=username).first()
     db.session.delete(user)
@@ -71,7 +71,7 @@ def delete_project():
 
 @manager.command
 def create_relation():
-    "Relation an user with a project."
+    "Relation a user with a project."
     user = Users.query.filter_by(username=input("Username:")).first()
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.append(project)
@@ -79,7 +79,7 @@ def create_relation():
 
 @manager.command
 def delete_relation():
-    "Delete relation of an user with a project."
+    "Delete relation of a user with a project."
     user = Users.query.filter_by(username=input("Username:")).first()
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.remove(project)
