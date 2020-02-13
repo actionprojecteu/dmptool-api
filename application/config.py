@@ -12,8 +12,8 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/db/dbase.db'.format(PWD)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-#MONGO_URI = 'mongodb://mongodb:27017/dmptool'
-MONGO_URI = 'mongodb://localhost:27017/dmptool'
+MONGO_URI = 'mongodb://mongodb:27017/dmptool'
+#MONGO_URI = 'mongodb://localhost:27017/dmptool'
 
 
 JWT_SECRET_KEY = 'jwt-secret for the tokens'
