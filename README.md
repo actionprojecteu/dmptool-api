@@ -133,10 +133,26 @@ The api files in order are:
 ### Models.py
 
 [models.py](application/models.py) contains the model for the tables of the sql database. As you can see in the image, the differents tables of the database are:
-<br/>![Model of sqlite3](https://i.ibb.co/PhP74N9/Modelsqlite.png#centerme)
- - **User**: 
- 	- hola
- - **Project**: 
+<p align="center">  <img src="https://i.ibb.co/PhP74N9/Modelsqlite.png">  </p>
+
+ - **user**: table of the users of the api.
+ 	- id: primary key of the user (Integer).
+ 	- username: name of the user (String, unique and no nulleable).
+ 	- password_hash: hashcode of the user's password (String and no nulleable).
+ 	- email: email of the user, by default is none (String).
+ 	- admin: defines if the user has admin permissions by default is false (Boolean).
+ - **project**: table of the projects of the api.
+ 	- id: primary key of the user (Integer).
+ 	- name: name of the user (String, unique and no nulleable).
+ 	- description: description of the project, by default is none (Text).
+ - **user_project**: table of the relation Many-to-Many of the users and projects.
+ 	- id_user: foreign key of the user (Integer).
+ 	- id_project: foreign key of the project (Integer).
+
+### Config.py
+
+[config.py](application/config.py) configuration file of the server.
+
 
 
 
@@ -146,8 +162,7 @@ The api files in order are:
 - [x] Create README.md
 - [ ] Finish README.md
 - [ ] Delete test routes
-- [ ] Update timestamp in the creation of the task.
-- [X] Added timestamp to tasks.
+- [X] Update timestamp in the creation of the task.
 - [X] Filter task by id dmp.
 - [X] Order task by timestamp.
  	
