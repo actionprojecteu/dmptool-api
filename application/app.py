@@ -10,6 +10,8 @@ from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
     jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt
+import pymongo
+import datetime
 import logging
 import json
 import os
@@ -230,11 +232,18 @@ def delete_dmp(dmp_id):
 @app.route('/tasks', methods=['GET'])
 @jwt_required
 def get_all_tasks():
+    id_dmp = request.args.get('id_dmp')
     status = request.args.get('status')
-    if status is not None:
-        tasks = mongo.db.tasks.find({'status':status})
+    if id_dmp is not None:
+        if status is not None:
+            tasks = mongo.db.tasks.find({'dmp':id_dmp,'status':status}).sort('timestamp',pymongo.DESCENDING)
+        else:
+            tasks = mongo.db.tasks.find({'dmp':id_dmp}).sort('timestamp',pymongo.DESCENDING)
     else:
-        tasks = mongo.db.tasks.find()
+        if status is not None:
+            tasks = mongo.db.tasks.find({'status':status}).sort('timestamp',pymongo.DESCENDING)
+        else:
+            tasks = mongo.db.tasks.find().sort('timestamp',pymongo.DESCENDING)
     output = []
     for task in tasks:
         output.append(task)
@@ -251,6 +260,7 @@ def post_task():
         app.logger.warning("Failed to decode JSON object.")
         return jsonify(error="Failed to decode JSON object."), 400
     data.update({'status':'pending'})
+    data.update({'timestamp':datetime.datetime.utcnow()})
     _id = mongo.db.tasks.insert_one(data).inserted_id
     app.logger.info('task %s created by %s successfully.', str(_id), get_jwt_identity())
     return jsonify({'id':str(_id), 'ok': True, 'msg': 'Task created successfully.'}), 201
@@ -355,6 +365,8 @@ def method_not_allowed(error):
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, datetime.datetime):
+            return o.__str__()
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
