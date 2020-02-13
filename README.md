@@ -133,7 +133,7 @@ The api files in order are:
 ### Models.py
 
 [models.py](application/models.py) contains the model for the tables of the sql database. As you can see in the image, the differents tables of the database are:
-<br/>![Model of sqlite3](https://i.ibb.co/PhP74N9/Modelsqlite.png)
+<br/>![Model of sqlite3](https://i.ibb.co/PhP74N9/Modelsqlite.png?style=centerme)
  - **User**: 
  	- hola
  - **Project**: 
