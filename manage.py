@@ -13,12 +13,16 @@ def create_tables():
     "Create relational database tables."
     db.create_all()
     db.session.commit()
+    print("Create database tables successfully.")
 
 @manager.command
 def drop_tables():
     "Drop all project relational database tables. THIS DELETES ALL DATA."
     if prompt_bool("Are you sure you want to lose all your data:"):
         db.drop_all()
+        print("Drop database tables successfully.")
+    print("Drop database tables cancelled.")
+
 
 
 @manager.command
@@ -31,6 +35,7 @@ def create_admin():
     usu = Users(**user)
     db.session.add(usu)
     db.session.commit()
+    print("Create user successfully.")
 
 @manager.command
 def create_user():
@@ -42,6 +47,7 @@ def create_user():
     usu = Users(**user)
     db.session.add(usu)
     db.session.commit()
+    print("Create user successfully.")
 
 @manager.command
 def delete_user():
@@ -50,6 +56,7 @@ def delete_user():
     user = Users.query.filter_by(username=username).first()
     db.session.delete(user)
     db.session.commit()
+    print("Delete user successfully.")
 
 
 @manager.command
@@ -60,6 +67,7 @@ def create_project():
     pro = Projects(**project)
     db.session.add(pro)
     db.session.commit()
+    print("Create project successfully.")
 
 @manager.command
 def delete_project():
@@ -68,6 +76,7 @@ def delete_project():
     project = Projects.query.filter_by(name=projectname).first()
     db.session.delete(project)
     db.session.commit()
+    print("Delete project successfully.")
 
 
 @manager.command
@@ -77,6 +86,7 @@ def create_relation():
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.append(project)
     db.session.commit()
+    print("Create user-project relationship successfully.")
 
 @manager.command
 def delete_relation():
@@ -85,6 +95,7 @@ def delete_relation():
     project = Projects.query.filter_by(name=input("Project Name:")).first()
     user.projects.remove(project)
     db.session.commit()
+    print("Delete user-project relationship successfully.")
 
 
 @manager.command
