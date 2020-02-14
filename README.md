@@ -154,10 +154,20 @@ The [models.py](application/models.py) file contains the model for the tables of
  	- id_user: foreign key of the user (Integer).
  	- id_project: foreign key of the project (Integer).
 
-## Configuration
+## Configuration and dependencies
 
 The [config.py](application/config.py) is the configuration file of the server. It contains the parameters for the CORS, JWT tokens, path or connection to the mongodb and sqlite3.
 
+The [Dockerfile](Dockerfile) file contains the specifics to build a Docker image. For build the image, you need to execute the following command in the project folder:
+<br/>`sudo docker build -t dmptool-api .`
+<br/>Before running the image, we need to create a mongo docker where the dmps and images wll be saved:
+<br/>`docker run -d -p 27017:27017 --name mongodb mongo`
+<br/>Lastly, we run the docker image maping the log, dbase and document folders to the host machine, and connecting the docker to our mongo docker:
+<br/>`docker run --name mydmptool-api -v /var/log/dmptool:/opt/log -v /home/dmptool/dbase-dmptool:/opt/db -v /home/dmptool/documents-dmptool:/opt/documents -p 5000:5000 --link mongodb:mongo -d dmptool-api`
+
+
+The [requeriments.txt](requeriments.txt) contains the python libraries needed for the proper functioning of the server. They could be installed by:
+<br/>`pip install -r requeriments.txt`
 
 
 <br/>
