@@ -18,7 +18,7 @@ The api files in order are:
  	- [dbase.db](db/dbase.dbd) : database sqlite3 for users and projects.
  - [manage.py](manage.py) : main python file with several command options for managing the database and starting the server.
  - [Dockerfile](Dockerfile) : file for dockerize the api.
- - [requeriments.txt](requeriments.txt) : the libraries needed for the proper operation of the server.
+ - [requirements.txt](requirements.txt) : the libraries needed for the proper operation of the server.
 
 ## Command line methods
 
@@ -166,8 +166,8 @@ The [Dockerfile](Dockerfile) file contains the specifics to build a Docker image
 <br/>`docker run --name mydmptool-api -v /var/log/dmptool:/opt/log -v /home/dmptool/dbase-dmptool:/opt/db -v /home/dmptool/documents-dmptool:/opt/documents -p 5000:5000 --link mongodb:mongo -d dmptool-api`
 
 
-The [requeriments.txt](requeriments.txt) contains the python libraries needed for the proper operation of the server. They could be installed by:
-<br/>`pip install -r requeriments.txt`
+The [requirements.txt](requirements.txt) contains the python libraries needed for the proper operation of the server. They could be installed by:
+<br/>`pip install -r requirements.txt`
 
 
 <br/>
