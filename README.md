@@ -18,7 +18,7 @@ The api files in order are:
  	- [dbase.db](db/dbase.dbd) : database sqlite3 for users and projects.
  - [manage.py](manage.py) : main python file with several command options for managing the database and starting the server.
  - [Dockerfile](Dockerfile) : file for dockerize the api.
- - [requeriments.txt](requeriments.txt) : the libraries needed for the proper functioning of the server.
+ - [requeriments.txt](requeriments.txt) : the libraries needed for the proper operation of the server.
 
 ## Command line methods
 
@@ -160,13 +160,13 @@ The [config.py](application/config.py) is the configuration file of the server. 
 
 The [Dockerfile](Dockerfile) file contains the specifics to build a Docker image. For build the image, you need to execute the following command in the project folder:
 <br/>`sudo docker build -t dmptool-api .`
-<br/>Before running the image, we need to create a mongo docker where the dmps and images wll be saved:
+<br/>Before running the image, we need to create a mongo docker where the dmps and images will be saved:
 <br/>`docker run -d -p 27017:27017 --name mongodb mongo`
-<br/>Lastly, we run the docker image maping the log, dbase and document folders to the host machine, and connecting the docker to our mongo docker:
+<br/>Lastly, we run the docker image mapping the log, dbase and document folders to the host machine, and connecting the docker to our mongo docker:
 <br/>`docker run --name mydmptool-api -v /var/log/dmptool:/opt/log -v /home/dmptool/dbase-dmptool:/opt/db -v /home/dmptool/documents-dmptool:/opt/documents -p 5000:5000 --link mongodb:mongo -d dmptool-api`
 
 
-The [requeriments.txt](requeriments.txt) contains the python libraries needed for the proper functioning of the server. They could be installed by:
+The [requeriments.txt](requeriments.txt) contains the python libraries needed for the proper operation of the server. They could be installed by:
 <br/>`pip install -r requeriments.txt`
 
 
