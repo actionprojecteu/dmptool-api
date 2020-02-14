@@ -181,6 +181,7 @@ The [requeriments.txt](requeriments.txt) contains the python libraries needed fo
 - [x] Create README.md
 - [X] Finish README.md
 - [ ] Delete test routes
+- [ ] Add protection to files
 - [X] Update timestamp in the creation of the task.
 - [X] Filter task by id dmp.
 - [X] Order task by timestamp.
