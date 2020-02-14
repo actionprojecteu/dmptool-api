@@ -1,8 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, DateTime, Integer,\
     String, Text, Float
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship, backref
 from application.app import db
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Projects(db.Model):

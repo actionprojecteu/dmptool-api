@@ -2,6 +2,7 @@ from flask_script import Manager, prompt_bool
 from application.app import app, db
 from application.models import *
 from getpass import getpass
+from flask import Flask
 
 manager = Manager(app)
 app.config['DEBUG'] = True

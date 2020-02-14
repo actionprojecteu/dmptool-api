@@ -179,7 +179,7 @@ The [requeriments.txt](requeriments.txt) contains the python libraries needed fo
 ## Future tasks
 
 - [x] Create README.md
-- [ ] Finish README.md
+- [X] Finish README.md
 - [ ] Delete test routes
 - [X] Update timestamp in the creation of the task.
 - [X] Filter task by id dmp.
