@@ -20,9 +20,9 @@ The api files in order are:
  - [Dockerfile](Dockerfile) : file for dockerize the api.
  - [requeriments.txt](requeriments.txt) : the libraries needed for the proper functioning of the server.
 
-### Manage.py
+## Command line methods
 
-[manage.py](manage.py) is the main python file of the api and it is used by command line. The possibles functions are:
+The [manage.py](manage.py) file, which it is the main python file of the api, allows to manipulate the database and start the server with the command line. Possibles functions are:
  - **Manage tables**: manages the tables of the sql database.
  	- Create tables: creates the tables of the sql database.
 <br/>`python manage.py create_tables`
@@ -55,9 +55,9 @@ The api files in order are:
 <br/>It could be used with others commands to get more info of them. For example:
 <br/>`python manage.py runserver -?`
 
-### App.py
+## Server routes
 
-[app.py](application/app.py) controls the flask server in production and development mode. The differents URIs and methods that are in the server are:
+The [app.py](application/app.py) file controls the flask server in production and development mode. The differents URIs and methods allowed in the server are:
  - **Login**: manage the user sessions.
  	- /login : the user log in the server.
  		- Method: GET
@@ -111,6 +111,11 @@ The api files in order are:
  		- Request: bearer token of a user and a task (json) in the body.
  		- Response: json object with a msg of success and the id of the task generated.
  		- Status code: 201
+ 	- /tasks/<task_id> : return the task with the task_id.
+ 		- Method: GET
+ 		- Request: bearer token of a user.
+ 		- Response: json object the requested task.
+ 		- Status code: 200
  - **File**: send files of the dmp.
  	- /resources/docx/<file_id> : return the file_id.docx file.
  		- Method: GET
@@ -130,9 +135,9 @@ The api files in order are:
  		- Status code: 200
  - **Test**: some test routes that will be deleted in the future.
 
-### Models.py
+## Database Model
 
-[models.py](application/models.py) contains the model for the tables of the sql database. As you can see in the image, the differents tables of the database are:
+The [models.py](application/models.py) file contains the model for the tables of the sql database. As you can see in the image, the differents tables of the database are:
 <p align="center">  <img src="https://i.ibb.co/PhP74N9/Modelsqlite.png">  </p>
 
  - **user**: table of the users of the api.
@@ -149,13 +154,17 @@ The api files in order are:
  	- id_user: foreign key of the user (Integer).
  	- id_project: foreign key of the project (Integer).
 
-### Config.py
+## Configuration
 
-[config.py](application/config.py) configuration file of the server.
-
-
+The [config.py](application/config.py) is the configuration file of the server. It contains the parameters for the CORS, JWT tokens, path or connection to the mongodb and sqlite3.
 
 
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
 
 ## Future tasks
 
