@@ -1,15 +1,15 @@
 ##################### Imports #####################
 
-from flask import Flask, request, abort, session, jsonify, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from application import config
-from werkzeug.utils import secure_filename
-from bson import ObjectId
-from logging.handlers import RotatingFileHandler
-from flask_pymongo import PyMongo, ObjectId
-from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, \
     jwt_required, jwt_optional, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt
+from flask import Flask, request, abort, session, jsonify, send_from_directory
+from logging.handlers import RotatingFileHandler
+from flask_pymongo import PyMongo, ObjectId
+from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
+from application import config
+from flask_cors import CORS
+from bson import ObjectId
 import pymongo
 import datetime
 import logging
@@ -266,18 +266,18 @@ def post_task():
     return jsonify({'id':str(_id), 'ok': True, 'msg': 'Task created successfully.'}), 201
 
 
-@app.route('/tasks/<tasks_id>', methods=['GET'])
+@app.route('/tasks/<task_id>', methods=['GET'])
 @jwt_required
-def get_task(tasks_id):
+def get_task(task_id):
     try:
-        tasks = mongo.db.tasks.find_one({'_id': ObjectId(tasks_id)})
+        tasks = mongo.db.tasks.find_one({'_id': ObjectId(task_id)})
     except Exception as e:
-        app.logger.warning("Not a correct tasks id.")
+        app.logger.warning("Not a correct tasks id: %s .", task_id)
         return jsonify(error="Not a correct tasks id."), 400
     if tasks is None:
-        app.logger.warning('Task %s not found.', tasks_id)
-        return jsonify({'error': 'Task ' + tasks_id + 'not found.'}), 404
-    app.logger.info('%s received %s task successfully.', get_jwt_identity(), tasks_id)
+        app.logger.warning('Task %s not found.', task_id)
+        return jsonify({'error': 'Task ' + task_id + 'not found.'}), 404
+    app.logger.info('%s received %s task successfully.', get_jwt_identity(), task_id)
     return JSONEncoder().encode(tasks)
 
 
